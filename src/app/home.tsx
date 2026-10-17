@@ -1,56 +1,172 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
-import { Image } from 'expo-image';
 import { ANIMALS } from '@/data/animals';
 import { DECOR } from '@/data/backgrounds';
-import { categoryTints, colors } from '@/theme/colors';
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
 import { scale } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
-import { AnimalImg, Card, Logo, Scene } from '@/ui/kit';
+import { Card, Scene } from '@/ui/kit';
 
-type CatIcon = React.ComponentProps<typeof Ionicons>['name'];
-// Ionicons are PLACEHOLDERS until categories/*.png (3D) are registered in DECOR.categories.
-const SOON: { key: string; name: string; icon: CatIcon; tint: string }[] = [
-  { key: 'fruits', name: 'Fruits', icon: 'nutrition', tint: colors.red },
-  { key: 'vegetables', name: 'Vegetables', icon: 'leaf', tint: colors.orange },
-  { key: 'body_parts', name: 'Body Parts', icon: 'body', tint: colors.lion },
-  { key: 'flowers', name: 'Flowers', icon: 'flower', tint: colors.pinkHot },
-  { key: 'numbers', name: 'Numbers', icon: 'calculator', tint: colors.blue },
+const CATEGORIES = [
+  { key: 'fruits', name: 'Fruits', emoji: '🍎', sub: 'Coming Soon' },
+  { key: 'vegetables', name: 'Vegetables', emoji: '🥕', sub: 'Coming Soon' },
+  { key: 'body_parts', name: 'Body Parts', emoji: '👦', sub: 'Coming Soon' },
+  { key: 'flowers', name: 'Flowers', emoji: '🌸', sub: 'Coming Soon' },
+  { key: 'numbers', name: 'Numbers', emoji: '🔢', sub: 'Coming Soon' },
 ];
 
 export default function Home() {
-  const h = scale(128);
+  const cardHeight = scale(126);
+
   return (
-    <Scene bg="home" top={colors.homeSky} bottom={colors.screenCream} foliage={false}>
-      <Pressable onPress={() => router.push('/settings')} accessibilityLabel="Settings" style={{ position: 'absolute', right: 0, top: 6, width: 38, height: 38, borderRadius: 19, backgroundColor: colors.blue, alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
-        <Ionicons name="settings" size={20} color={colors.white} />
+    <Scene bg="home">
+      {/* Settings Button in top right */}
+      <Pressable
+        onPress={() => router.push('/settings')}
+        accessibilityLabel="Settings"
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 6,
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          backgroundColor: '#2F8BFF',
+          borderWidth: 2.5,
+          borderColor: colors.white,
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10,
+          shadowColor: '#000',
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 2 },
+          elevation: 4,
+        }}
+      >
+        <Ionicons name="settings" size={22} color={colors.white} />
       </Pressable>
-      <View style={{ alignItems: 'center' }}>
-        <Logo size={scale(34)} />
-        <Text style={{ ...typography.body, color: colors.title, marginVertical: 8 }}>Choose a category to start learning</Text>
+
+      {/* Screen 2: 3D Little Learners Logo */}
+      <View style={{ alignItems: 'center', marginTop: scale(4) }}>
+        {DECOR.logo ? (
+          <Image
+            source={DECOR.logo}
+            style={{ width: scale(220), height: scale(96) }}
+            contentFit="contain"
+          />
+        ) : (
+          <Text style={{ ...typography.hero, color: colors.orange }}>Little Learners</Text>
+        )}
+        <Text
+          style={{
+            ...typography.body,
+            fontWeight: '700',
+            color: '#2B3A4A',
+            marginTop: 4,
+            marginBottom: 10,
+            textShadowColor: 'rgba(255,255,255,0.7)',
+            textShadowRadius: 3,
+            textShadowOffset: { width: 0, height: 1 },
+          }}
+        >
+          Choose a category to start learning
+        </Text>
       </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 }}>
-        <Card onPress={() => router.push('/animals')} style={{ width: '48%', height: h, backgroundColor: categoryTints[0], borderColor: colors.yellow }}>
-          <AnimalImg animal={ANIMALS[0]} size={scale(78)} />
-          <Text style={{ ...typography.heading, fontSize: 16, color: colors.ink }}>Animals</Text>
-          <Text style={{ ...typography.small, color: colors.title }}>10 Animals</Text>
+
+      {/* 2x3 Grid of Category Cards */}
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          rowGap: 12,
+        }}
+      >
+        {/* Animals Card */}
+        <Card
+          onPress={() => router.push('/animals')}
+          style={{
+            width: '48%',
+            height: cardHeight,
+            backgroundColor: '#FFF8E1',
+            borderRadius: radius.xl,
+            borderWidth: 2,
+            borderColor: '#FFE082',
+            padding: 8,
+          }}
+        >
+          <Image
+            source={ANIMALS[0].image}
+            style={{ width: scale(62), height: scale(62) }}
+            contentFit="contain"
+          />
+          <Text
+            style={{
+              ...typography.heading,
+              fontSize: 16,
+              fontWeight: '900',
+              color: colors.ink,
+              marginTop: 4,
+            }}
+          >
+            Animals
+          </Text>
+          <Text
+            style={{
+              ...typography.small,
+              fontWeight: '800',
+              color: '#34A853',
+              marginTop: 1,
+            }}
+          >
+            {ANIMALS.length} Animals
+          </Text>
         </Card>
-        {SOON.map((c, i) => (
-          <Card key={c.key} style={{ width: '48%', height: h, backgroundColor: categoryTints[i + 1] }}>
-            <View style={{ opacity: 0.55, alignItems: 'center' }}>
-              {DECOR.categories?.[c.key] ? <Image source={DECOR.categories[c.key]!} style={{ width: scale(70), height: scale(70) }} contentFit="contain" /> : <Ionicons name={c.icon} size={scale(52)} color={c.tint} />}
-              <Text style={{ ...typography.heading, fontSize: 15, color: colors.ink }}>{c.name}</Text>
+
+        {/* Other 5 Categories (Coming Soon) */}
+        {CATEGORIES.map((c) => (
+          <Card
+            key={c.key}
+            style={{
+              width: '48%',
+              height: cardHeight,
+              backgroundColor: colors.white,
+              borderRadius: radius.xl,
+              borderWidth: 1.5,
+              borderColor: colors.border,
+              padding: 8,
+            }}
+          >
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: scale(42), lineHeight: scale(50) }}>{c.emoji}</Text>
+              <Text
+                style={{
+                  ...typography.heading,
+                  fontSize: 16,
+                  fontWeight: '800',
+                  color: colors.ink,
+                  marginTop: 2,
+                }}
+              >
+                {c.name}
+              </Text>
+              <Text
+                style={{
+                  ...typography.small,
+                  fontWeight: '700',
+                  color: colors.muted,
+                  marginTop: 1,
+                }}
+              >
+                {c.sub}
+              </Text>
             </View>
-            <Ionicons name="lock-closed" size={18} color={colors.muted} style={{ position: 'absolute', top: '38%' }} />
-            <Text style={{ ...typography.small, color: colors.muted }}>Coming Soon</Text>
           </Card>
         ))}
-      </View>
-      <View style={{ flex: 1 }} />
-      <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 28 }}>
-        <Pressable onPress={() => router.push('/progress')}><Text style={{ ...typography.body, fontWeight: '800', color: colors.blue }}>My Progress</Text></Pressable>
-        <Pressable onPress={() => router.push('/review')}><Text style={{ ...typography.body, fontWeight: '800', color: colors.blue }}>Review</Text></Pressable>
       </View>
     </Scene>
   );

@@ -29,7 +29,10 @@ const migrate = (raw: Partial<State>): State => {
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [s, setS] = useState<State>(EMPTY);
   const [ready, setReady] = useState(false);
-  const latest = useRef(s); latest.current = s;
+  const latest = useRef(s);
+  useEffect(() => {
+    latest.current = s;
+  }, [s]);
   useEffect(() => {
     AsyncStorage.getItem(KEY).then((v) => { if (v) setS(migrate(JSON.parse(v))); }).catch(() => {}).finally(() => setReady(true));
   }, []);
@@ -44,7 +47,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     },
     set: (k, v) => save({ ...latest.current, [k]: v }),
     reset: () => save({ ...latest.current, stats: {} }), // settings are kept; only learning progress is cleared
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [s, ready]);
   return <C.Provider value={value}>{children}</C.Provider>;
 }

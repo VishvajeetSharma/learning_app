@@ -1,4 +1,4 @@
-import React, { forwardRef, memo, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { PanResponder, View, ViewStyle } from 'react-native';
 import Svg, { Circle, G, Path, Polygon, Text as SvgText } from 'react-native-svg';
 import { LETTERS, Pt } from '@/lib/letters';
@@ -54,25 +54,52 @@ export const DrawCanvas = forwardRef<CanvasHandle, P>(({ width, height, guide, i
   const inks = Array.isArray(ink) ? ink : [ink];
   const [done, setDone] = useState<Pt[][]>([]);
   const [live, setLive] = useState<Pt[] | null>(null);
-  const doneRef = useRef<Pt[][]>([]); const curRef = useRef<Pt[] | null>(null); const cb = useRef(onChange); cb.current = onChange;
+  const doneRef = useRef<Pt[][]>([]);
+  const curRef = useRef<Pt[] | null>(null);
+  const cb = useRef(onChange);
+  useEffect(() => {
+    cb.current = onChange;
+  }, [onChange]);
+
   const commit = (n: Pt[][]) => { doneRef.current = n; setDone(n); cb.current?.(n); };
   useImperativeHandle(ref, () => ({ clear: () => { curRef.current = null; setLive(null); commit([]); }, undo: () => commit(doneRef.current.slice(0, -1)) }), []);
 
-  const pan = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => true, onMoveShouldSetPanResponder: () => true, onPanResponderTerminationRequest: () => false,
-    onPanResponderGrant: (e) => { curRef.current = [{ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY }]; setLive(curRef.current); },
-    onPanResponderMove: (e) => {
-      const c = curRef.current; if (!c) return;
-      const p = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY }, l = c[c.length - 1];
-      if (Math.hypot(p.x - l.x, p.y - l.y) < 3) return;
-      curRef.current = [...c, p]; setLive(curRef.current);   // only the live <Path> re-renders; finished strokes are memoised
-    },
-    onPanResponderRelease: () => { const c = curRef.current; curRef.current = null; setLive(null); if (c) commit([...doneRef.current, c]); },
-    onPanResponderTerminate: () => { const c = curRef.current; curRef.current = null; setLive(null); if (c) commit([...doneRef.current, c]); },
-  }), []);
+  // eslint-disable-next-line react-hooks/refs
+  const [panResponder] = useState(() =>
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (e) => {
+        curRef.current = [{ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY }];
+        setLive(curRef.current);
+      },
+      onPanResponderMove: (e) => {
+        const c = curRef.current;
+        if (!c) return;
+        const p = { x: e.nativeEvent.locationX, y: e.nativeEvent.locationY };
+        const l = c[c.length - 1];
+        if (Math.hypot(p.x - l.x, p.y - l.y) < 3) return;
+        curRef.current = [...c, p];
+        setLive(curRef.current);
+      },
+      onPanResponderRelease: () => {
+        const c = curRef.current;
+        curRef.current = null;
+        setLive(null);
+        if (c) commit([...doneRef.current, c]);
+      },
+      onPanResponderTerminate: () => {
+        const c = curRef.current;
+        curRef.current = null;
+        setLive(null);
+        if (c) commit([...doneRef.current, c]);
+      },
+    })
+  );
 
   return (
-    <View {...pan.panHandlers} style={[{ width, height }, style]}>
+    <View {...panResponder.panHandlers} style={[{ width, height }, style]}>
       <Svg width={width} height={height} pointerEvents="none">
         {guide ? <Guide letter={guide} w={width} h={height} /> : null}
         <Committed strokes={done} ink={inks} t={thickness} />
@@ -81,6 +108,7 @@ export const DrawCanvas = forwardRef<CanvasHandle, P>(({ width, height, guide, i
     </View>
   );
 });
+DrawCanvas.displayName = 'DrawCanvas';
 
 /** Read-only replay of a recorded attempt, scaled to fit (used on the Not Quite screen). */
 export const StrokePreview = ({ strokes, srcW, srcH, width, height, ink = colors.red }: { strokes: Pt[][]; srcW: number; srcH: number; width: number; height: number; ink?: string | string[] }) => {

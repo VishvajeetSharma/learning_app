@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Text, View, useWindowDimensions } from 'react-native';
 import { getAnimal } from '@/data/animals';
 import { DECOR } from '@/data/backgrounds';
-import { Image } from 'expo-image';
-import { LETTERS, verifyTrace } from '@/lib/letters';
-import type { Pt } from '@/lib/letters';
+import { Pt, verifyTrace } from '@/lib/letters';
 import { speak } from '@/lib/speak';
 import { useStore } from '@/lib/store';
 import { colors } from '@/theme/colors';
@@ -19,41 +18,158 @@ import { Btn, Header, Scene } from '@/ui/kit';
 
 export default function Trace() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const a = getAnimal(id); const letters = a.name.toUpperCase().split(''); const { voice } = useStore();
-  const [i, setI] = useState(0); const [msg, setMsg] = useState('Trace the dotted letter with your finger'); const [h, setH] = useState(scale(300));
+  const a = getAnimal(id);
+  const letters = a.name.toUpperCase().split('');
+  const { voice } = useStore();
+  const [i, setI] = useState(0);
+  const [h, setH] = useState(scale(290));
   const cv = useRef<CanvasHandle>(null);
-  const { width } = useWindowDimensions(); const w = Math.min(width, 480) - scale(32) - 8;
+  const { width } = useWindowDimensions();
+  const w = Math.min(width, 480) - scale(32) - 8;
 
-  // Verify after every finished stroke: succeed as soon as the letter is covered; only nag once the expected number of strokes is drawn.
   const onChange = (px: Pt[][]) => {
     if (!px.length) return;
-    const need = LETTERS[letters[i]]?.length ?? 1;
     if (verifyTrace(letters[i], toGuideUnits(px, w, h))) {
-      speak(letters[i], voice); cv.current?.clear();
-      if (i + 1 >= letters.length) router.replace({ pathname: '/write', params: { id: a.id } });
-      else { setI(i + 1); setMsg('Great! Next letter'); }
-    } else if (px.length >= need) setMsg('Try to follow the dots a little closer');
+      speak(letters[i], voice);
+      cv.current?.clear();
+      if (i + 1 >= letters.length) {
+        router.replace({ pathname: '/write', params: { id: a.id } });
+      } else {
+        setI(i + 1);
+      }
+    }
   };
+
   return (
     <Scene bg="tracing">
-      <Header title="Trace & Write" sub={`${i + 1} of ${letters.length}`} />
-      <View style={{ flex: 1, backgroundColor: colors.white, borderRadius: radius.xl, padding: 4, borderWidth: 3, borderColor: colors.blueSoft, ...shadows.soft }} onLayout={(e) => setH(e.nativeEvent.layout.height)}>
-        <DrawCanvas key={i} ref={cv} width={w} height={h} guide={letters[i]} ink={colors.blue} thickness={11} onChange={onChange} />
-        <View style={{ position: 'absolute', right: 12, top: 12, width: 38, height: 38, borderRadius: 19, backgroundColor: colors.blueSoft, alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name="volume-high" size={22} color={colors.blue} onPress={() => speak(a.name, true)} />
+      <Header
+        title="Trace & Write"
+        sub={`${i + 1} of ${letters.length}`}
+        home={true}
+        back={true}
+      />
+
+      {/* Screen 5: Tablet Drawing Board */}
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.white,
+          borderRadius: radius.xl,
+          padding: 6,
+          borderWidth: 3,
+          borderColor: '#D4E4FA',
+          ...shadows.soft,
+        }}
+        onLayout={(e) => setH(e.nativeEvent.layout.height)}
+      >
+        <DrawCanvas
+          key={i}
+          ref={cv}
+          width={w}
+          height={h}
+          guide={letters[i]}
+          ink={colors.blue}
+          thickness={12}
+          onChange={onChange}
+        />
+
+        {/* Top-Right Speaker Button */}
+        <View
+          style={{
+            position: 'absolute',
+            right: 12,
+            top: 12,
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: '#D9EBFF',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons
+            name="volume-high"
+            size={22}
+            color={colors.blue}
+            onPress={() => speak(letters[i], true)}
+          />
         </View>
-        {DECOR.tracingFinger ? <View pointerEvents="none" style={{ position: 'absolute', right: 6, bottom: 6 }}><Image source={DECOR.tracingFinger} style={{ width: scale(90), height: scale(90) }} contentFit="contain" /></View> : null}
+
+        {DECOR.tracingFinger ? (
+          <View
+            pointerEvents="none"
+            style={{ position: 'absolute', right: 8, bottom: 8 }}
+          >
+            <Image
+              source={DECOR.tracingFinger}
+              style={{ width: scale(88), height: scale(88) }}
+              contentFit="contain"
+            />
+          </View>
+        ) : null}
       </View>
-      <Text style={{ ...typography.body, fontWeight: '800', textAlign: 'center', marginVertical: 8, color: colors.title }}>{msg}</Text>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-        {letters.map((l, k) => (
-          <View key={k} style={{ flex: 1, margin: 3, height: scale(54), borderRadius: radius.md, backgroundColor: k < i ? colors.greenBg : colors.white, borderWidth: 3, borderColor: k === i ? colors.blue : colors.border, alignItems: 'center', justifyContent: 'center', ...shadows.card }}>
-            <Text style={{ ...typography.title, fontSize: 26, color: colors.title }}>{l}</Text>
-          </View>))}
+
+      {/* Screen 5: Letter Tiles Row: L - I - O - N */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginVertical: 14,
+        }}
+      >
+        {letters.map((l, k) => {
+          const isDone = k < i;
+          const isCurrent = k === i;
+
+          return (
+            <View
+              key={k}
+              style={{
+                flex: 1,
+                marginHorizontal: 4,
+                height: scale(58),
+                borderRadius: radius.md,
+                backgroundColor: colors.white,
+                borderWidth: isCurrent ? 3 : 1.5,
+                borderColor: isCurrent ? '#2F8BFF' : '#E2E8F0',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ...shadows.card,
+              }}
+            >
+              <Text
+                style={{
+                  ...typography.title,
+                  fontSize: 26,
+                  fontWeight: '900',
+                  color: isDone ? colors.greenDark : '#1E5BB8',
+                }}
+              >
+                {l}
+              </Text>
+            </View>
+          );
+        })}
       </View>
-      <View style={{ flexDirection: 'row', gap: 12 }}>
-        <Btn label="Clear" icon="refresh" kind="red" onPress={() => cv.current?.clear()} style={{ flex: 1 }} small />
-        <Btn label="Hear Again" icon="volume-high" kind="soft" onPress={() => speak(a.name, true)} style={{ flex: 1 }} small />
+
+      {/* Screen 5: Red "Clear" & Blue "Hear Again" Buttons */}
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
+        <Btn
+          label="Clear"
+          icon="refresh"
+          kind="red"
+          onPress={() => cv.current?.clear()}
+          style={{ flex: 1 }}
+          small
+        />
+        <Btn
+          label="Hear Again"
+          icon="volume-high"
+          kind="blue"
+          onPress={() => speak(a.name, true)}
+          style={{ flex: 1 }}
+          small
+        />
       </View>
     </Scene>
   );

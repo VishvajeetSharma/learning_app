@@ -10,37 +10,167 @@ import { typography } from '@/theme/typography';
 import { Btn, Header, Scene } from '@/ui/kit';
 
 type Icon = React.ComponentProps<typeof Ionicons>['name'];
+
 export default function Settings() {
-  const st = useStore(); const [ask, setAsk] = useState(false);
-  const row = (icon: Icon, label: string, right: React.ReactNode, onPress?: () => void, color: string = colors.ink) => (
-    <Pressable onPress={onPress} disabled={!onPress} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 15, paddingHorizontal: 14, borderBottomWidth: 1, borderColor: colors.border }}>
-      <Ionicons name={icon} size={22} color={color} /><Text style={{ ...typography.body, fontWeight: '700', color, flex: 1, marginLeft: 12 }}>{label}</Text>{right}
-    </Pressable>);
-  const sw = (k: 'sound' | 'voice' | 'music') => <Switch value={st[k]} onValueChange={(v) => st.set(k, v)} trackColor={{ true: colors.green, false: colors.track }} thumbColor={colors.white} />;
-  const chev = <Ionicons name="chevron-forward" size={18} color={colors.muted} />;
+  const st = useStore();
+  const [ask, setAsk] = useState(false);
+
+  const row = (
+    icon: Icon,
+    label: string,
+    right: React.ReactNode,
+    onPress?: () => void,
+    color: string = colors.ink
+  ) => (
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 14,
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderColor: '#EEF2F6',
+      }}
+    >
+      <Ionicons name={icon} size={22} color={color} />
+      <Text
+        style={{
+          ...typography.body,
+          fontWeight: '700',
+          color,
+          flex: 1,
+          marginLeft: 14,
+          fontSize: 16,
+        }}
+      >
+        {label}
+      </Text>
+      {right}
+    </Pressable>
+  );
+
+  const sw = (k: 'sound' | 'voice' | 'music') => (
+    <Switch
+      value={st[k]}
+      onValueChange={(v) => st.set(k, v)}
+      trackColor={{ true: '#28A745', false: '#D9E2EC' }}
+      thumbColor={colors.white}
+    />
+  );
+
+  const chev = <Ionicons name="chevron-forward" size={18} color="#94A3B8" />;
+
   return (
-    <Scene top={colors.settingsBg} bottom={colors.settingsBgBottom} foliage={false}>
-      <Header title="Settings" home={false} />
-      <View style={{ backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden', ...shadows.card }}>
-        {row('volume-high', 'Sound Effects', sw('sound'))}
-        {row('megaphone', 'Voice Pronunciation', sw('voice'))}
-        {row('musical-notes', 'Background Music', sw('music'))}
-        {row('trophy', 'View Progress', chev, () => router.push('/progress'))}
-        {row('refresh-circle', 'Reset Progress', chev, () => setAsk(true), colors.red)}
-        {row('information-circle', 'About App', chev, () => Alert.alert('Little Learners', 'Play • Learn • Grow\nVersion 1.0.0\nWorks fully offline.'))}
+    <Scene bg="animals">
+      {/* Screen 12: Header */}
+      <Header title="Settings" home={false} back={true} />
+
+      {/* Screen 12: Settings List Grouped Card */}
+      <View
+        style={{
+          backgroundColor: colors.white,
+          borderRadius: radius.xl,
+          overflow: 'hidden',
+          borderWidth: 1.5,
+          borderColor: colors.border,
+          ...shadows.card,
+        }}
+      >
+        {row('volume-high-outline', 'Sound Effects', sw('sound'))}
+        {row('megaphone-outline', 'Voice Pronunciation', sw('voice'))}
+        {row('musical-notes-outline', 'Background Music', sw('music'))}
+        {row('trophy-outline', 'View Progress', chev, () => router.push('/progress'))}
+        {row('refresh-circle-outline', 'Reset Progress', chev, () => setAsk(true), '#E53935')}
+        {row(
+          'information-circle-outline',
+          'About App',
+          chev,
+          () =>
+            Alert.alert(
+              'Little Learners',
+              'Play • Learn • Grow\nVersion 1.0.0\nSafe & ad-free.'
+            )
+        )}
       </View>
+
+      <View style={{ flex: 1 }} />
+
+      {/* Screen 12: Bottom Reset Confirmation Modal */}
       {ask && (
-        <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: colors.overlay, justifyContent: 'flex-end', padding: 12 }}>
-          <View style={{ backgroundColor: colors.pinkSoft, borderRadius: radius.xl, borderWidth: 3, borderColor: colors.red, padding: 16, alignItems: 'center', marginBottom: 24 }}>
-            <Ionicons name="alert-circle" size={44} color={colors.red} />
-            <Text style={{ ...typography.title, color: colors.red, marginVertical: 4 }}>Reset Progress?</Text>
-            <Text style={{ ...typography.small, textAlign: 'center', color: colors.ink, marginBottom: 14 }}>This will clear all your learning progress.{'\n'}This action cannot be undone.</Text>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <Btn label="Cancel" kind="soft" onPress={() => setAsk(false)} style={{ flex: 1 }} small />
-              <Btn label="Yes, Reset" kind="red" onPress={() => { st.reset(); setAsk(false); }} style={{ flex: 1 }} small />
-            </View>
+        <View
+          style={{
+            backgroundColor: '#FFF2F4',
+            borderRadius: radius.xl,
+            borderWidth: 2,
+            borderColor: '#FFCCD5',
+            padding: 18,
+            alignItems: 'center',
+            marginBottom: 16,
+            ...shadows.card,
+          }}
+        >
+          {/* Red exclamation mark in circle */}
+          <View
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 23,
+              backgroundColor: '#FF4757',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 8,
+            }}
+          >
+            <Text style={{ fontSize: 28, color: colors.white, fontWeight: '900' }}>!</Text>
           </View>
-        </View>)}
+
+          <Text
+            style={{
+              ...typography.title,
+              color: '#FF4757',
+              fontSize: 20,
+              fontWeight: '900',
+              marginBottom: 4,
+            }}
+          >
+            Reset Progress?
+          </Text>
+          <Text
+            style={{
+              ...typography.body,
+              textAlign: 'center',
+              color: colors.ink,
+              fontSize: 13,
+              marginBottom: 16,
+              paddingHorizontal: 8,
+            }}
+          >
+            This will clear all your learning progress.{'\n'}This action cannot be undone.
+          </Text>
+
+          <View style={{ flexDirection: 'row', gap: 12, width: '100%' }}>
+            <Btn
+              label="Cancel"
+              kind="soft"
+              onPress={() => setAsk(false)}
+              style={{ flex: 1 }}
+              small
+            />
+            <Btn
+              label="Yes, Reset"
+              kind="red"
+              onPress={() => {
+                st.reset();
+                setAsk(false);
+              }}
+              style={{ flex: 1 }}
+              small
+            />
+          </View>
+        </View>
+      )}
     </Scene>
   );
 }
