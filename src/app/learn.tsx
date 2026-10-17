@@ -4,6 +4,8 @@ import { View } from 'react-native';
 import { ANIMALS, getAnimal } from '@/data/animals';
 import { speak } from '@/lib/speak';
 import { useStore } from '@/lib/store';
+import { colors } from '@/theme/colors';
+import { radius } from '@/theme/radius';
 import { scale } from '@/theme/spacing';
 import { AnimalImg, Btn, Header, RoundBtn, Scene, WoodSign } from '@/ui/kit';
 
@@ -46,28 +48,41 @@ export default function Learn() {
         back={true}
       />
 
-      {/* Screen 4: 3D Animal sitting on rock */}
+      {/* Screen 4: 3D Animal with breathing life & aura */}
       <View
         style={{
           alignItems: 'center',
-          marginTop: scale(10),
+          marginTop: scale(12),
         }}
       >
-        <AnimalImg animal={a} size={scale(245)} />
+        <AnimalImg animal={a} size={scale(245)} aura={true} />
       </View>
 
-      {/* 3D Carved Wooden Sign: LION */}
-      <View style={{ alignItems: 'center', marginTop: -scale(16) }}>
+      {/* 3D Carved Wooden Sign: Animal Name */}
+      <View style={{ alignItems: 'center', marginTop: -scale(14) }}>
         <WoodSign text={a.name} />
       </View>
 
-      {/* Hear Pronunciation & Auto Play Round Buttons */}
+      {/* Hear Pronunciation & Auto Play Controls Dock */}
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
-          gap: 40,
-          marginTop: scale(16),
+          alignSelf: 'center',
+          alignItems: 'center',
+          gap: 36,
+          marginTop: scale(14),
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          paddingHorizontal: 26,
+          paddingVertical: 10,
+          borderRadius: radius.xxl,
+          borderWidth: 2,
+          borderColor: colors.white,
+          shadowColor: '#000',
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
+          shadowOffset: { width: 0, height: 4 },
+          elevation: 4,
         }}
       >
         <RoundBtn
@@ -81,7 +96,7 @@ export default function Learn() {
           icon={auto ? 'pause' : 'play'}
           kind="orange"
           size={58}
-          label="Auto Play"
+          label={auto ? 'Pause' : 'Auto Play'}
           onPress={() => setAuto(!auto)}
         />
       </View>
@@ -92,7 +107,7 @@ export default function Learn() {
       <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8 }}>
         <Btn
           label="← Previous"
-          kind="grey"
+          kind="soft"
           disabled={idx === 0}
           onPress={() => go(idx - 1)}
           style={{ flex: 1 }}

@@ -24,29 +24,44 @@ export default function Splash() {
       <View style={{ flex: 1 }} />
 
       {/* Screen 1: Capsule Loading Bar at the bottom */}
-      <View style={{ alignItems: 'center', marginBottom: scale(38) }}>
+      <View style={{ alignItems: 'center', marginBottom: scale(42) }}>
         <View
           style={{
-            width: '65%',
-            height: 18,
-            borderRadius: 9,
-            backgroundColor: 'rgba(255, 255, 255, 0.85)',
-            overflow: 'hidden',
-            borderWidth: 2.5,
+            width: '74%',
+            height: 24,
+            borderRadius: 12,
+            backgroundColor: 'rgba(255, 255, 255, 0.92)',
+            borderWidth: 3,
             borderColor: colors.white,
-            padding: 2,
+            padding: 3,
             shadowColor: '#000',
             shadowOpacity: 0.25,
-            shadowRadius: 6,
-            shadowOffset: { width: 0, height: 3 },
-            elevation: 4,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 6,
+            justifyContent: 'center',
           }}
         >
+          {/* Top gloss strip across the capsule */}
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 2,
+              left: 10,
+              right: 10,
+              height: 7,
+              borderRadius: 4,
+              backgroundColor: colors.gloss,
+              zIndex: 5,
+            }}
+          />
+
           <Animated.View
             style={{
               height: '100%',
-              backgroundColor: '#2F8BFF',
-              borderRadius: 6,
+              backgroundColor: '#3B82F6',
+              borderRadius: 8,
               width: progressAnim.interpolate({
                 inputRange: [0, 1],
                 outputRange: ['0%', '100%'],
@@ -54,20 +69,34 @@ export default function Splash() {
             }}
           />
         </View>
-        <Text
+
+        <View
           style={{
-            ...typography.body,
-            marginTop: 6,
-            fontWeight: '900',
-            color: '#4E2A0A',
-            fontSize: 14,
-            textShadowColor: 'rgba(255,255,255,0.7)',
-            textShadowRadius: 2,
-            textShadowOffset: { width: 0, height: 1 },
+            backgroundColor: 'rgba(255, 255, 255, 0.90)',
+            paddingHorizontal: 16,
+            paddingVertical: 4,
+            borderRadius: 16,
+            marginTop: 8,
+            borderWidth: 1.5,
+            borderColor: colors.white,
+            shadowColor: '#000',
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 3,
           }}
         >
-          Loading...
-        </Text>
+          <Text
+            style={{
+              ...typography.small,
+              fontWeight: '900',
+              color: '#0F294D',
+              fontSize: 13,
+            }}
+          >
+            Getting ready to play... ✨
+          </Text>
+        </View>
       </View>
     </Scene>
   );

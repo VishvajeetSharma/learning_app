@@ -19,30 +19,48 @@ export default function Settings() {
     icon: Icon,
     label: string,
     right: React.ReactNode,
+    iconBg: string,
+    iconColor: string,
     onPress?: () => void,
-    color: string = colors.ink
+    textColor: string = '#1E293B',
+    isLast: boolean = false
   ) => (
     <Pressable
       onPress={onPress}
       disabled={!onPress}
-      style={{
+      style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 14,
+        paddingVertical: 13,
         paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderColor: '#EEF2F6',
-      }}
+        borderBottomWidth: isLast ? 0 : 1,
+        borderColor: '#F1F5F9',
+        backgroundColor: pressed ? '#F8FAFC' : colors.white,
+      })}
     >
-      <Ionicons name={icon} size={22} color={color} />
+      <View
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 19,
+          backgroundColor: iconBg,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderWidth: 1.5,
+          borderColor: colors.white,
+          ...shadows.subtle,
+        }}
+      >
+        <Ionicons name={icon} size={20} color={iconColor} />
+      </View>
       <Text
         style={{
           ...typography.body,
-          fontWeight: '700',
-          color,
+          fontWeight: '800',
+          color: textColor,
           flex: 1,
           marginLeft: 14,
-          fontSize: 16,
+          fontSize: 15.5,
         }}
       >
         {label}
@@ -55,7 +73,7 @@ export default function Settings() {
     <Switch
       value={st[k]}
       onValueChange={(v) => st.set(k, v)}
-      trackColor={{ true: '#28A745', false: '#D9E2EC' }}
+      trackColor={{ true: '#10B981', false: '#E2E8F0' }}
       thumbColor={colors.white}
     />
   );
@@ -71,27 +89,48 @@ export default function Settings() {
       <View
         style={{
           backgroundColor: colors.white,
-          borderRadius: radius.xl,
+          borderRadius: radius.card,
           overflow: 'hidden',
-          borderWidth: 1.5,
-          borderColor: colors.border,
+          borderWidth: 2,
+          borderBottomWidth: 4,
+          borderColor: '#E2E8F0',
+          borderBottomColor: '#CBD5E1',
           ...shadows.card,
         }}
       >
-        {row('volume-high-outline', 'Sound Effects', sw('sound'))}
-        {row('megaphone-outline', 'Voice Pronunciation', sw('voice'))}
-        {row('musical-notes-outline', 'Background Music', sw('music'))}
-        {row('trophy-outline', 'View Progress', chev, () => router.push('/progress'))}
-        {row('refresh-circle-outline', 'Reset Progress', chev, () => setAsk(true), '#E53935')}
+        {row('volume-high', 'Sound Effects', sw('sound'), '#FFEDD5', '#EA580C')}
+        {row('megaphone', 'Voice Pronunciation', sw('voice'), '#DCFCE7', '#16A34A')}
+        {row('musical-notes', 'Background Music', sw('music'), '#F3E8FF', '#9333EA')}
         {row(
-          'information-circle-outline',
+          'trophy',
+          'View Progress',
+          chev,
+          '#FEF9C3',
+          '#CA8A04',
+          () => router.push('/progress')
+        )}
+        {row(
+          'refresh-circle',
+          'Reset Progress',
+          chev,
+          '#FFE4E6',
+          '#E11D48',
+          () => setAsk(true),
+          '#E11D48'
+        )}
+        {row(
+          'information-circle',
           'About App',
           chev,
+          '#E0F2FE',
+          '#0284C7',
           () =>
             Alert.alert(
               'Little Learners',
-              'Play • Learn • Grow\nVersion 1.0.0\nSafe & ad-free.'
-            )
+              'Play • Learn • Grow\nVersion 1.0.0\nSafe, fun & ad-free.'
+            ),
+          '#1E293B',
+          true
         )}
       </View>
 
@@ -101,11 +140,13 @@ export default function Settings() {
       {ask && (
         <View
           style={{
-            backgroundColor: '#FFF2F4',
-            borderRadius: radius.xl,
-            borderWidth: 2,
-            borderColor: '#FFCCD5',
-            padding: 18,
+            backgroundColor: '#FFF1F2',
+            borderRadius: radius.card,
+            borderWidth: 2.5,
+            borderBottomWidth: 4.5,
+            borderColor: '#FECDD3',
+            borderBottomColor: '#FDA4AF',
+            padding: 20,
             alignItems: 'center',
             marginBottom: 16,
             ...shadows.card,
@@ -114,22 +155,29 @@ export default function Settings() {
           {/* Red exclamation mark in circle */}
           <View
             style={{
-              width: 46,
-              height: 46,
-              borderRadius: 23,
-              backgroundColor: '#FF4757',
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+              backgroundColor: '#F43F5E',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 8,
+              marginBottom: 10,
+              borderWidth: 2.5,
+              borderColor: colors.white,
+              shadowColor: '#F43F5E',
+              shadowOpacity: 0.35,
+              shadowRadius: 6,
+              shadowOffset: { width: 0, height: 3 },
+              elevation: 4,
             }}
           >
-            <Text style={{ fontSize: 28, color: colors.white, fontWeight: '900' }}>!</Text>
+            <Ionicons name="alert" size={28} color={colors.white} />
           </View>
 
           <Text
             style={{
               ...typography.title,
-              color: '#FF4757',
+              color: '#BE123C',
               fontSize: 20,
               fontWeight: '900',
               marginBottom: 4,
@@ -141,10 +189,11 @@ export default function Settings() {
             style={{
               ...typography.body,
               textAlign: 'center',
-              color: colors.ink,
+              color: '#475569',
               fontSize: 13,
               marginBottom: 16,
               paddingHorizontal: 8,
+              lineHeight: 18,
             }}
           >
             This will clear all your learning progress.{'\n'}This action cannot be undone.
@@ -153,7 +202,7 @@ export default function Settings() {
           <View style={{ flexDirection: 'row', gap: 12, width: '100%' }}>
             <Btn
               label="Cancel"
-              kind="soft"
+              kind="white"
               onPress={() => setAsk(false)}
               style={{ flex: 1 }}
               small

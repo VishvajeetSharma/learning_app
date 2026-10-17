@@ -1,80 +1,119 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { ANIMALS } from '@/data/animals';
 import { DECOR } from '@/data/backgrounds';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
+import { shadows } from '@/theme/shadows';
 import { scale } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
-import { Card, Scene } from '@/ui/kit';
+import { Card, Circle, Scene } from '@/ui/kit';
 
 const CATEGORIES = [
-  { key: 'fruits', name: 'Fruits', emoji: '🍎', sub: 'Coming Soon' },
-  { key: 'vegetables', name: 'Vegetables', emoji: '🥕', sub: 'Coming Soon' },
-  { key: 'body_parts', name: 'Body Parts', emoji: '👦', sub: 'Coming Soon' },
-  { key: 'flowers', name: 'Flowers', emoji: '🌸', sub: 'Coming Soon' },
-  { key: 'numbers', name: 'Numbers', emoji: '🔢', sub: 'Coming Soon' },
+  {
+    key: 'fruits',
+    name: 'Fruits',
+    emoji: '🍎',
+    sub: 'Coming Soon',
+    bg: '#FFF1F2',
+    border: '#FECDD3',
+    badgeBg: '#FFE4E6',
+    badgeText: '#E11D48',
+  },
+  {
+    key: 'vegetables',
+    name: 'Vegetables',
+    emoji: '🥕',
+    sub: 'Coming Soon',
+    bg: '#F0FDF4',
+    border: '#BBF7D0',
+    badgeBg: '#DCFCE7',
+    badgeText: '#16A34A',
+  },
+  {
+    key: 'body_parts',
+    name: 'Body Parts',
+    emoji: '👦',
+    sub: 'Coming Soon',
+    bg: '#FFF7ED',
+    border: '#FED7AA',
+    badgeBg: '#FFEDD5',
+    badgeText: '#EA580C',
+  },
+  {
+    key: 'flowers',
+    name: 'Flowers',
+    emoji: '🌸',
+    sub: 'Coming Soon',
+    bg: '#FAF5FF',
+    border: '#E9D5FF',
+    badgeBg: '#F3E8FF',
+    badgeText: '#9333EA',
+  },
+  {
+    key: 'numbers',
+    name: 'Numbers',
+    emoji: '🔢',
+    sub: 'Coming Soon',
+    bg: '#F0F9FF',
+    border: '#BAE6FD',
+    badgeBg: '#E0F2FE',
+    badgeText: '#0284C7',
+  },
 ];
 
 export default function Home() {
-  const cardHeight = scale(126);
+  const cardHeight = scale(132);
 
   return (
     <Scene bg="home">
       {/* Settings Button in top right */}
-      <Pressable
-        onPress={() => router.push('/settings')}
-        accessibilityLabel="Settings"
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 6,
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          backgroundColor: '#2F8BFF',
-          borderWidth: 2.5,
-          borderColor: colors.white,
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10,
-          shadowColor: '#000',
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          shadowOffset: { width: 0, height: 2 },
-          elevation: 4,
-        }}
-      >
-        <Ionicons name="settings" size={22} color={colors.white} />
-      </Pressable>
+      <View style={{ position: 'absolute', right: scale(16), top: 12, zIndex: 10 }}>
+        <Circle
+          icon="settings"
+          onPress={() => router.push('/settings')}
+          label="Settings"
+          kind="yellow"
+        />
+      </View>
 
       {/* Screen 2: 3D Little Learners Logo */}
-      <View style={{ alignItems: 'center', marginTop: scale(4) }}>
+      <View style={{ alignItems: 'center', marginTop: scale(-15) }}>
         {DECOR.logo ? (
           <Image
             source={DECOR.logo}
-            style={{ width: scale(220), height: scale(96) }}
+            style={{ width: scale(250), height: scale(120) }}
             contentFit="contain"
           />
         ) : (
           <Text style={{ ...typography.hero, color: colors.orange }}>Little Learners</Text>
         )}
-        <Text
+
+        <View
           style={{
-            ...typography.body,
-            fontWeight: '700',
-            color: '#2B3A4A',
+            backgroundColor: 'rgba(255, 255, 255, 0.90)',
+            paddingHorizontal: 16,
+            paddingVertical: 5,
+            borderRadius: radius.pill,
             marginTop: 4,
-            marginBottom: 10,
-            textShadowColor: 'rgba(255,255,255,0.7)',
-            textShadowRadius: 3,
-            textShadowOffset: { width: 0, height: 1 },
+            marginBottom: 12,
+            borderWidth: 1.5,
+            borderColor: colors.white,
+            ...shadows.subtle,
           }}
         >
-          Choose a category to start learning
-        </Text>
+          <Text
+            style={{
+              ...typography.small,
+              fontWeight: '900',
+              color: '#1E293B',
+              fontSize: 13,
+            }}
+          >
+            Choose a category to start learning ✨
+          </Text>
+        </View>
       </View>
 
       {/* 2x3 Grid of Category Cards */}
@@ -86,45 +125,71 @@ export default function Home() {
           rowGap: 12,
         }}
       >
-        {/* Animals Card */}
+        {/* Animals Card - Premier Active Category */}
         <Card
           onPress={() => router.push('/animals')}
           style={{
             width: '48%',
             height: cardHeight,
-            backgroundColor: '#FFF8E1',
+            backgroundColor: '#FFFBEB',
             borderRadius: radius.xl,
-            borderWidth: 2,
-            borderColor: '#FFE082',
+            borderWidth: 2.5,
+            borderColor: '#FCD34D',
             padding: 8,
+            ...shadows.card,
           }}
         >
+          {/* Top gloss strip */}
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 2,
+              left: 10,
+              right: 10,
+              height: 18,
+              borderRadius: radius.xl,
+              backgroundColor: colors.gloss,
+            }}
+          />
+
           <Image
             source={ANIMALS[0].image}
-            style={{ width: scale(62), height: scale(62) }}
+            style={{ width: scale(64), height: scale(64) }}
             contentFit="contain"
           />
           <Text
             style={{
               ...typography.heading,
-              fontSize: 16,
+              fontSize: 17,
               fontWeight: '900',
-              color: colors.ink,
-              marginTop: 4,
+              color: '#1E293B',
+              marginTop: 3,
             }}
           >
             Animals
           </Text>
-          <Text
+          <View
             style={{
-              ...typography.small,
-              fontWeight: '800',
-              color: '#34A853',
-              marginTop: 1,
+              backgroundColor: '#DCFCE7',
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+              borderRadius: radius.pill,
+              marginTop: 3,
+              borderWidth: 1,
+              borderColor: '#86EFAC',
             }}
           >
-            {ANIMALS.length} Animals
-          </Text>
+            <Text
+              style={{
+                ...typography.micro,
+                fontWeight: '900',
+                color: '#15803D',
+              }}
+            >
+              {ANIMALS.length} Animals • Play! ⭐
+            </Text>
+          </View>
         </Card>
 
         {/* Other 5 Categories (Coming Soon) */}
@@ -134,36 +199,46 @@ export default function Home() {
             style={{
               width: '48%',
               height: cardHeight,
-              backgroundColor: colors.white,
+              backgroundColor: c.bg,
               borderRadius: radius.xl,
-              borderWidth: 1.5,
-              borderColor: colors.border,
+              borderWidth: 2,
+              borderColor: c.border,
               padding: 8,
+              ...shadows.card,
             }}
           >
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ fontSize: scale(42), lineHeight: scale(50) }}>{c.emoji}</Text>
+              <Text style={{ fontSize: scale(38), lineHeight: scale(46) }}>{c.emoji}</Text>
               <Text
                 style={{
                   ...typography.heading,
                   fontSize: 16,
                   fontWeight: '800',
-                  color: colors.ink,
+                  color: '#1E293B',
                   marginTop: 2,
                 }}
               >
                 {c.name}
               </Text>
-              <Text
+              <View
                 style={{
-                  ...typography.small,
-                  fontWeight: '700',
-                  color: colors.muted,
-                  marginTop: 1,
+                  backgroundColor: c.badgeBg,
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  borderRadius: radius.pill,
+                  marginTop: 3,
                 }}
               >
-                {c.sub}
-              </Text>
+                <Text
+                  style={{
+                    ...typography.micro,
+                    fontWeight: '800',
+                    color: c.badgeText,
+                  }}
+                >
+                  {c.sub} 🔒
+                </Text>
+              </View>
             </View>
           </Card>
         ))}

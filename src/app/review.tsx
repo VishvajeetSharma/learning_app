@@ -21,15 +21,15 @@ export default function Review() {
         back={true}
       />
 
-      {/* Screen 11: 3-column Grid of 10 Animal Cards with lock badges */}
+      {/* Screen 11: 3-column Grid of Animal Cards with gamified badges */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           flexDirection: 'row',
           flexWrap: 'wrap',
-          rowGap: 10,
+          rowGap: 12,
           columnGap: 8,
-          paddingBottom: 24,
+          paddingBottom: 28,
         }}
       >
         {ANIMALS.map((a) => {
@@ -41,45 +41,99 @@ export default function Review() {
               onPress={() => router.push({ pathname: '/learn', params: { id: a.id } })}
               style={{
                 width: '31.5%',
-                height: scale(106),
-                backgroundColor: colors.white,
-                borderRadius: radius.lg,
-                borderWidth: 1.5,
-                borderColor: colors.border,
+                height: scale(116),
+                backgroundColor: done ? '#FFF' : '#F8FAFC',
+                borderRadius: radius.card,
+                borderWidth: 2,
+                borderBottomWidth: 3.5,
+                borderColor: done ? '#BBF7D0' : '#E2E8F0',
+                borderBottomColor: done ? '#86EFAC' : '#CBD5E1',
                 padding: 6,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <AnimalImg animal={a} size={scale(60)} dim={!done} />
-              <Text
+              {/* Soft halo for learned animals */}
+              {done ? (
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    width: scale(56),
+                    height: scale(56),
+                    borderRadius: scale(28),
+                    backgroundColor: '#DCFCE7',
+                    opacity: 0.75,
+                  }}
+                />
+              ) : null}
+
+              <AnimalImg animal={a} size={scale(64)} dim={!done} />
+              <View
                 style={{
-                  ...typography.small,
-                  fontSize: 13,
-                  fontWeight: '800',
-                  color: colors.ink,
+                  backgroundColor: done ? '#F0FDF4' : '#F1F5F9',
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  borderRadius: radius.pill,
                   marginTop: 4,
+                  borderWidth: 1,
+                  borderColor: done ? '#DCFCE7' : '#E2E8F0',
                 }}
               >
-                {a.name}
-              </Text>
+                <Text
+                  style={{
+                    ...typography.small,
+                    fontSize: 12.5,
+                    fontWeight: '900',
+                    color: done ? '#15803D' : '#64748B',
+                  }}
+                >
+                  {a.name}
+                </Text>
+              </View>
 
-              {/* Screen 11: Lock Badge on locked items */}
-              {!done && (
+              {/* Status Badges */}
+              {done ? (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    width: 22,
+                    height: 22,
+                    borderRadius: 11,
+                    backgroundColor: '#16A34A',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderWidth: 1.5,
+                    borderColor: colors.white,
+                    shadowColor: '#16A34A',
+                    shadowOpacity: 0.3,
+                    shadowRadius: 3,
+                    shadowOffset: { width: 0, height: 1 },
+                    elevation: 2,
+                  }}
+                >
+                  <Ionicons name="checkmark" size={13} color={colors.white} />
+                </View>
+              ) : (
                 <View
                   style={{
                     position: 'absolute',
                     bottom: 6,
                     right: 6,
-                    width: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    backgroundColor: '#CBD5E1',
+                    width: 22,
+                    height: 22,
+                    borderRadius: 11,
+                    backgroundColor: '#E2E8F0',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    borderWidth: 1.5,
+                    borderColor: colors.white,
                   }}
                 >
-                  <Ionicons name="lock-closed" size={11} color={colors.white} />
+                  <Ionicons name="lock-closed" size={12} color="#64748B" />
                 </View>
               )}
             </Card>

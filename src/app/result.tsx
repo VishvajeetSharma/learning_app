@@ -7,6 +7,7 @@ import { speak } from '@/lib/speak';
 import { useStore } from '@/lib/store';
 import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
+import { shadows } from '@/theme/shadows';
 import { scale } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { StrokePreview } from '@/ui/Canvas';
@@ -25,65 +26,92 @@ export default function Result() {
 
   return (
     <Scene bg={good ? 'success' : 'wrong'}>
-      <View style={{ alignItems: 'center', marginTop: scale(14) }}>
+      <View style={{ alignItems: 'center', marginTop: scale(12) }}>
         {/* Screen 7 & 8: 3D Inflated Title */}
-        <Text
+        <View
           style={{
-            ...typography.hero,
-            fontSize: scale(38),
-            color: good ? '#FF9A00' : '#FF4757',
-            fontWeight: '900',
-            letterSpacing: 1,
-            textShadowColor: good ? '#8E4E00' : '#8A1521',
-            textShadowRadius: 3,
-            textShadowOffset: { width: 0, height: 2 },
+            backgroundColor: good ? '#FEF3C7' : '#FFE4E6',
+            paddingHorizontal: 22,
+            paddingVertical: 6,
+            borderRadius: radius.pill,
+            borderWidth: 2.5,
+            borderColor: good ? '#FCD34D' : '#FDA4AF',
+            shadowColor: good ? '#D97706' : '#E11D48',
+            shadowOpacity: 0.18,
+            shadowRadius: 6,
+            shadowOffset: { width: 0, height: 3 },
+            elevation: 4,
           }}
         >
-          {good ? 'Excellent!' : 'Not quite!'}
-        </Text>
+          <Text
+            style={{
+              ...typography.hero,
+              fontSize: scale(32),
+              color: good ? '#D97706' : '#E11D48',
+              fontWeight: '900',
+              letterSpacing: 1,
+            }}
+          >
+            {good ? 'Excellent! 🌟' : 'Almost There! 💪'}
+          </Text>
+        </View>
 
         {!good && (
           <Text
             style={{
               ...typography.title,
               textAlign: 'center',
-              color: colors.ink,
-              fontSize: 17,
+              color: '#1E293B',
+              fontSize: 16,
               fontWeight: '800',
-              marginTop: 4,
+              marginTop: 6,
             }}
           >
-            That&apos;s not correct.{'\n'}Try again!
+            That&apos;s not quite right.{'\n'}Let&apos;s practice again!
           </Text>
         )}
 
         {/* Animal Character */}
-        <View style={{ marginTop: scale(10) }}>
+        <View style={{ marginTop: scale(8) }}>
           <AnimalImg
             animal={a}
-            size={scale(good ? 230 : 190)}
+            size={scale(good ? 220 : 180)}
             dim={!good}
+            aura={good}
           />
         </View>
 
         {good && (
-          <View style={{ alignItems: 'center', marginTop: scale(8) }}>
-            <Text style={{ ...typography.title, fontSize: 18, color: colors.ink, fontWeight: '800' }}>
+          <View
+            style={{
+              alignItems: 'center',
+              marginTop: scale(6),
+              backgroundColor: 'rgba(255, 255, 255, 0.92)',
+              paddingHorizontal: 24,
+              paddingVertical: 10,
+              borderRadius: radius.xl,
+              borderWidth: 2,
+              borderColor: '#BBF7D0',
+              ...shadows.card,
+            }}
+          >
+            <Text style={{ ...typography.subheading, fontSize: 15, color: '#64748B', fontWeight: '800' }}>
               You wrote
             </Text>
             <Text
               style={{
                 ...typography.hero,
-                fontSize: scale(38),
-                color: '#28A745',
+                fontSize: scale(36),
+                color: '#15803D',
                 fontWeight: '900',
                 letterSpacing: 2,
+                marginVertical: 2,
               }}
             >
               {a.name.toUpperCase()}
             </Text>
-            <Text style={{ ...typography.title, fontSize: 18, color: colors.ink, fontWeight: '800' }}>
-              correctly!
+            <Text style={{ ...typography.subheading, fontSize: 15, color: '#64748B', fontWeight: '800' }}>
+              correctly! 🎉
             </Text>
           </View>
         )}
@@ -91,17 +119,20 @@ export default function Result() {
 
       {/* Screen 8: Display Child's Handwriting attempt */}
       {!good && (
-        <View style={{ alignItems: 'center', marginTop: 12 }}>
+        <View style={{ alignItems: 'center', marginTop: 10 }}>
           <View
             style={{
               backgroundColor: colors.white,
-              borderRadius: radius.lg,
+              borderRadius: radius.xl,
               width: '92%',
               height: scale(96),
               alignItems: 'center',
               justifyContent: 'center',
-              borderWidth: 2,
-              borderColor: '#FFCCD5',
+              borderWidth: 2.5,
+              borderColor: '#FECDD3',
+              borderBottomWidth: 4,
+              borderBottomColor: '#FDA4AF',
+              ...shadows.card,
             }}
           >
             {showInk && attempt.strokes.length ? (
@@ -111,22 +142,33 @@ export default function Result() {
                 srcH={attempt.h}
                 width={scale(280)}
                 height={scale(80)}
-                ink="#FF4757"
+                ink="#F43F5E"
               />
             ) : null}
           </View>
           {attempt.hint ? (
-            <Text
+            <View
               style={{
-                ...typography.body,
-                color: colors.redDark,
-                marginTop: 6,
-                fontWeight: '700',
-                textAlign: 'center',
+                backgroundColor: '#FFF1F2',
+                paddingHorizontal: 16,
+                paddingVertical: 5,
+                borderRadius: radius.pill,
+                marginTop: 8,
+                borderWidth: 1,
+                borderColor: '#FECDD3',
               }}
             >
-              {attempt.hint}
-            </Text>
+              <Text
+                style={{
+                  ...typography.small,
+                  color: '#BE123C',
+                  fontWeight: '800',
+                  textAlign: 'center',
+                }}
+              >
+                {attempt.hint}
+              </Text>
+            </View>
           ) : null}
         </View>
       )}
@@ -134,7 +176,7 @@ export default function Result() {
       <View style={{ flex: 1 }} />
 
       {/* Screen 7 & 8: Buttons */}
-      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 10 }}>
         {!good && (
           <Btn
             label="Clear"
@@ -166,7 +208,7 @@ export default function Result() {
           }
         />
       ) : (
-        <Btn label="Try Again" icon="refresh" kind="red" onPress={retry} />
+        <Btn label="Try Again" icon="refresh" kind="orange" onPress={retry} />
       )}
     </Scene>
   );

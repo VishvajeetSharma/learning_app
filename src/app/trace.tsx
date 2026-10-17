@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, Text, View, useWindowDimensions } from 'react-native';
 import { getAnimal } from '@/data/animals';
 import { DECOR } from '@/data/backgrounds';
 import { Pt, verifyTrace } from '@/lib/letters';
@@ -49,15 +49,18 @@ export default function Trace() {
         back={true}
       />
 
-      {/* Screen 5: Tablet Drawing Board */}
+      {/* Screen 5: Magic Tablet Drawing Board */}
       <View
         style={{
           flex: 1,
           backgroundColor: colors.white,
           borderRadius: radius.xl,
           padding: 6,
-          borderWidth: 3,
-          borderColor: '#D4E4FA',
+          borderWidth: 4,
+          borderBottomWidth: 6,
+          borderColor: '#BFDBFE',
+          borderBottomColor: '#93C5FD',
+          overflow: 'hidden',
           ...shadows.soft,
         }}
         onLayout={(e) => setH(e.nativeEvent.layout.height)}
@@ -73,27 +76,31 @@ export default function Trace() {
           onChange={onChange}
         />
 
-        {/* Top-Right Speaker Button */}
-        <View
+        {/* Top-Right Speaker Bubble Button */}
+        <Pressable
+          onPress={() => speak(letters[i], true)}
+          accessibilityLabel="Hear letter pronunciation"
           style={{
             position: 'absolute',
             right: 12,
             top: 12,
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: '#D9EBFF',
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: '#DBEAFE',
+            borderWidth: 2,
+            borderColor: colors.white,
             alignItems: 'center',
             justifyContent: 'center',
+            shadowColor: '#2563EB',
+            shadowOpacity: 0.18,
+            shadowRadius: 4,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 3,
           }}
         >
-          <Ionicons
-            name="volume-high"
-            size={22}
-            color={colors.blue}
-            onPress={() => speak(letters[i], true)}
-          />
-        </View>
+          <Ionicons name="volume-high" size={22} color={colors.blue} />
+        </Pressable>
 
         {DECOR.tracingFinger ? (
           <View
@@ -109,12 +116,13 @@ export default function Trace() {
         ) : null}
       </View>
 
-      {/* Screen 5: Letter Tiles Row: L - I - O - N */}
+      {/* Screen 5: Chunky Candy Letter Blocks Row */}
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
           marginVertical: 14,
+          gap: 6,
         }}
       >
         {letters.map((l, k) => {
@@ -126,14 +134,28 @@ export default function Trace() {
               key={k}
               style={{
                 flex: 1,
-                marginHorizontal: 4,
-                height: scale(58),
+                height: scale(60),
                 borderRadius: radius.md,
-                backgroundColor: colors.white,
-                borderWidth: isCurrent ? 3 : 1.5,
-                borderColor: isCurrent ? '#2F8BFF' : '#E2E8F0',
+                backgroundColor: isDone
+                  ? '#DCFCE7'
+                  : isCurrent
+                  ? '#EFF6FF'
+                  : colors.white,
+                borderWidth: isCurrent ? 3 : 2,
+                borderBottomWidth: isCurrent ? 4.5 : 3.5,
+                borderColor: isDone
+                  ? '#86EFAC'
+                  : isCurrent
+                  ? '#3B82F6'
+                  : '#E2E8F0',
+                borderBottomColor: isDone
+                  ? '#4ADE80'
+                  : isCurrent
+                  ? '#1D4ED8'
+                  : '#CBD5E1',
                 alignItems: 'center',
                 justifyContent: 'center',
+                transform: [{ translateY: isCurrent ? -2 : 0 }],
                 ...shadows.card,
               }}
             >
@@ -142,17 +164,32 @@ export default function Trace() {
                   ...typography.title,
                   fontSize: 26,
                   fontWeight: '900',
-                  color: isDone ? colors.greenDark : '#1E5BB8',
+                  color: isDone
+                    ? '#15803D'
+                    : isCurrent
+                    ? '#1D4ED8'
+                    : '#64748B',
                 }}
               >
                 {l}
               </Text>
+              {isDone && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 2,
+                    right: 3,
+                  }}
+                >
+                  <Ionicons name="checkmark-circle" size={14} color="#16A34A" />
+                </View>
+              )}
             </View>
           );
         })}
       </View>
 
-      {/* Screen 5: Red "Clear" & Blue "Hear Again" Buttons */}
+      {/* Screen 5: Action Buttons */}
       <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
         <Btn
           label="Clear"
@@ -167,7 +204,7 @@ export default function Trace() {
           icon="volume-high"
           kind="blue"
           onPress={() => speak(a.name, true)}
-          style={{ flex: 1 }}
+          style={{ flex: 1.2 }}
           small
         />
       </View>
