@@ -1,11 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 import { ANIMALS, getAnimal } from '@/data/animals';
 import { speak } from '@/lib/speak';
 import { useStore } from '@/lib/store';
-import { colors } from '@/theme/colors';
-import { radius } from '@/theme/radius';
 import { scale } from '@/theme/spacing';
 import { AnimalImg, Btn, Header, RoundBtn, Scene, WoodSign } from '@/ui/kit';
 
@@ -16,6 +14,8 @@ export default function Learn() {
   const { voice } = useStore();
   const [auto, setAuto] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { height } = useWindowDimensions();
+  const animalSize = Math.max(170, Math.min(280, height * 0.31));
 
   const go = (n: number) => {
     router.replace({ pathname: '/learn', params: { id: ANIMALS[n].id } });
@@ -41,84 +41,61 @@ export default function Learn() {
 
   return (
     <Scene bg="learning">
-      <Header
-        title="Learn"
-        sub={`${idx + 1} of ${ANIMALS.length}`}
-        home={true}
-        back={true}
-      />
+      <Header title="Learn" sub={`${idx + 1} of ${ANIMALS.length}`} home={true} back={true} />
 
-      {/* Screen 4: 3D Animal with breathing life & aura */}
-      <View
-        style={{
-          alignItems: 'center',
-          marginTop: scale(12),
-        }}
-      >
-        <AnimalImg animal={a} size={scale(245)} aura={true} />
+      {/* Animal on a glowing stage (re-pops whenever the animal changes) */}
+      <View style={{ alignItems: 'center', marginTop: scale(6) }}>
+        <AnimalImg key={a.id} animal={a} size={animalSize} aura bounce />
       </View>
 
-      {/* 3D Carved Wooden Sign: Animal Name */}
-      <View style={{ alignItems: 'center', marginTop: -scale(14) }}>
+      {/* Carved wooden sign with the animal's name */}
+      <View style={{ alignItems: 'center', marginTop: -scale(14), zIndex: 2 }}>
         <WoodSign text={a.name} />
       </View>
 
-      {/* Hear Pronunciation & Auto Play Controls Dock */}
+      {/* Hear Pronunciation & Auto Play */}
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
-          alignSelf: 'center',
-          alignItems: 'center',
-          gap: 36,
-          marginTop: scale(14),
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
-          paddingHorizontal: 26,
-          paddingVertical: 10,
-          borderRadius: radius.xxl,
-          borderWidth: 2,
-          borderColor: colors.white,
-          shadowColor: '#000',
-          shadowOpacity: 0.1,
-          shadowRadius: 10,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: 4,
+          gap: 44,
+          marginTop: scale(12),
         }}
       >
         <RoundBtn
           icon="volume-high"
           kind="green"
-          size={58}
+          size={68}
           label={'Hear\nPronunciation'}
           onPress={() => speak(a.name, true)}
         />
         <RoundBtn
           icon={auto ? 'pause' : 'play'}
           kind="orange"
-          size={58}
-          label={auto ? 'Pause' : 'Auto Play'}
+          size={68}
+          label="Auto Play"
           onPress={() => setAuto(!auto)}
         />
       </View>
 
       <View style={{ flex: 1 }} />
 
-      {/* Screen 4: Bottom Navigation Bar with Previous and Next */}
-      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 8 }}>
+      {/* Previous / Next */}
+      <View style={{ flexDirection: 'row', gap: 14, marginBottom: 6 }}>
         <Btn
-          label="← Previous"
-          kind="soft"
+          label="Previous"
+          icon="arrow-back"
+          kind="grey"
           disabled={idx === 0}
           onPress={() => go(idx - 1)}
           style={{ flex: 1 }}
           small
         />
         <Btn
-          label="Next →"
+          label="Next"
+          iconRight="arrow-forward"
           kind="blue"
-          onPress={() =>
-            router.push({ pathname: '/trace', params: { id: a.id } })
-          }
+          onPress={() => router.push({ pathname: '/trace', params: { id: a.id } })}
           style={{ flex: 1.3 }}
           small
         />

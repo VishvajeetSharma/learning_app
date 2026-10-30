@@ -1,14 +1,25 @@
-export const fontFamily: { display?: string } = { display: undefined };
-const f = fontFamily.display ? { fontFamily: fontFamily.display } : {};
-export const typography = {
-  hero: { ...f, fontSize: 40, fontWeight: '900' as const, letterSpacing: -0.5 },
-  display: { ...f, fontSize: 34, fontWeight: '900' as const, letterSpacing: -0.5 },
-  title: { ...f, fontSize: 22, fontWeight: '800' as const, letterSpacing: -0.2 },
-  heading: { ...f, fontSize: 18, fontWeight: '800' as const },
-  subheading: { ...f, fontSize: 16, fontWeight: '700' as const },
-  body: { ...f, fontSize: 14, fontWeight: '600' as const },
-  small: { ...f, fontSize: 12, fontWeight: '700' as const },
-  micro: { ...f, fontSize: 10, fontWeight: '800' as const },
-  button: { ...f, fontSize: 18, fontWeight: '900' as const, letterSpacing: 0.3 },
+/**
+ * Fredoka (rounded, friendly, OFL-licensed) is bundled in assets/fonts and loaded in src/app/_layout.tsx.
+ * Each weight is a separate static face, so every style below keeps fontWeight '400' (never faux-bold the files).
+ * If the fonts fail to load the platform default is used, so nothing breaks.
+ */
+export const font = {
+  regular: 'Fredoka_400Regular',
+  medium: 'Fredoka_500Medium',
+  semi: 'Fredoka_600SemiBold',
+  bold: 'Fredoka_700Bold',
 };
+export const fontFamily = { display: font.bold };
 
+const w = { fontWeight: '400' as const };
+export const typography = {
+  hero: { fontFamily: font.bold, ...w, fontSize: 44 },
+  display: { fontFamily: font.bold, ...w, fontSize: 38 },
+  title: { fontFamily: font.bold, ...w, fontSize: 24 },
+  heading: { fontFamily: font.semi, ...w, fontSize: 20 },
+  body: { fontFamily: font.medium, ...w, fontSize: 16 },
+  bodyStrong: { fontFamily: font.semi, ...w, fontSize: 16 },
+  small: { fontFamily: font.medium, ...w, fontSize: 13 },
+  caption: { fontFamily: font.medium, ...w, fontSize: 12 },
+  button: { fontFamily: font.bold, ...w, fontSize: 20 },
+};

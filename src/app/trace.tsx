@@ -8,13 +8,13 @@ import { DECOR } from '@/data/backgrounds';
 import { Pt, verifyTrace } from '@/lib/letters';
 import { speak } from '@/lib/speak';
 import { useStore } from '@/lib/store';
-import { colors } from '@/theme/colors';
+import { Tone, colors, tones, ui } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { shadows } from '@/theme/shadows';
 import { scale } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
-import { CanvasHandle, DrawCanvas, toGuideUnits } from '@/ui/Canvas';
-import { Btn, Header, Scene } from '@/ui/kit';
+import { CanvasHandle, DrawCanvas, guideBox, toGuideUnits } from '@/ui/Canvas';
+import { Btn, Card, Gradient, Header, Scene } from '@/ui/kit';
 
 export default function Trace() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -40,173 +40,147 @@ export default function Trace() {
     }
   };
 
+  const box = guideBox(w, h);
+
   return (
     <Scene bg="tracing">
-      <Header
-        title="Trace & Write"
-        sub={`${i + 1} of ${letters.length}`}
-        home={true}
-        back={true}
-      />
+      <Header title="Trace & Write" sub={`${i + 1} of ${letters.length}`} home={true} back={true} />
 
-      {/* Screen 5: Magic Tablet Drawing Board */}
+      {/* Drawing tablet */}
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.white,
           borderRadius: radius.xl,
-          padding: 6,
-          borderWidth: 4,
-          borderBottomWidth: 6,
-          borderColor: '#BFDBFE',
-          borderBottomColor: '#93C5FD',
-          overflow: 'hidden',
+          backgroundColor: colors.white,
           ...shadows.soft,
         }}
         onLayout={(e) => setH(e.nativeEvent.layout.height)}
       >
-        <DrawCanvas
-          key={i}
-          ref={cv}
-          width={w}
-          height={h}
-          guide={letters[i]}
-          ink={colors.blue}
-          thickness={12}
-          onChange={onChange}
-        />
+        <View style={{ flex: 1, borderRadius: radius.xl, overflow: 'hidden', alignItems: 'center' }}>
+          <Gradient stops={['#FFFFFF', '#EEF6FF']} />
 
-        {/* Top-Right Speaker Bubble Button */}
-        <Pressable
-          onPress={() => speak(letters[i], true)}
-          accessibilityLabel="Hear letter pronunciation"
+          {/* writing lines: top line, mid line and baseline of the guide letter */}
+          <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: h }}>
+            {[
+              { y: box.y, c: ui.paperLine },
+              { y: box.y + box.s / 2, c: ui.paperLine },
+              { y: box.y + box.s, c: ui.paperLineStrong },
+            ].map((l, k) => (
+              <View
+                key={k}
+                style={{ position: 'absolute', left: 18, right: 18, top: l.y - 1, height: 3, borderRadius: 2, backgroundColor: l.c }}
+              />
+            ))}
+          </View>
+
+          <DrawCanvas
+            key={i}
+            ref={cv}
+            width={w}
+            height={h}
+            guide={letters[i]}
+            ink={colors.blue}
+            thickness={12}
+            onChange={onChange}
+          />
+
+          {/* Speaker button (whole circle is tappable) */}
+          <Pressable
+            onPress={() => speak(letters[i], true)}
+            accessibilityRole="button"
+            accessibilityLabel="Hear the letter"
+            hitSlop={6}
+            style={{
+              position: 'absolute',
+              right: 16,
+              top: 16,
+              width: 52,
+              height: 52,
+              borderRadius: 26,
+              backgroundColor: colors.blueSoft,
+              borderWidth: 3,
+              borderColor: colors.white,
+              alignItems: 'center',
+              justifyContent: 'center',
+              ...shadows.card,
+            }}
+          >
+            <Ionicons name="volume-high" size={26} color={colors.blue} />
+          </Pressable>
+
+          {DECOR.tracingFinger ? (
+            <View pointerEvents="none" style={{ position: 'absolute', right: 8, bottom: 8 }}>
+              <Image source={DECOR.tracingFinger} style={{ width: scale(88), height: scale(88) }} contentFit="contain" />
+            </View>
+          ) : null}
+        </View>
+
+        {/* tablet bezel drawn on top so strokes never spill over the frame */}
+        <View
+          pointerEvents="none"
           style={{
             position: 'absolute',
-            right: 12,
-            top: 12,
-            width: 44,
-            height: 44,
-            borderRadius: 22,
-            backgroundColor: '#DBEAFE',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderRadius: radius.xl,
+            borderWidth: 6,
+            borderColor: '#9CCBFF',
+          }}
+        />
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 6,
+            left: 6,
+            right: 6,
+            bottom: 6,
+            borderRadius: radius.xl - 6,
             borderWidth: 2,
             borderColor: colors.white,
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: '#2563EB',
-            shadowOpacity: 0.18,
-            shadowRadius: 4,
-            shadowOffset: { width: 0, height: 2 },
-            elevation: 3,
           }}
-        >
-          <Ionicons name="volume-high" size={22} color={colors.blue} />
-        </Pressable>
-
-        {DECOR.tracingFinger ? (
-          <View
-            pointerEvents="none"
-            style={{ position: 'absolute', right: 8, bottom: 8 }}
-          >
-            <Image
-              source={DECOR.tracingFinger}
-              style={{ width: scale(88), height: scale(88) }}
-              contentFit="contain"
-            />
-          </View>
-        ) : null}
+        />
       </View>
 
-      {/* Screen 5: Chunky Candy Letter Blocks Row */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginVertical: 14,
-          gap: 6,
-        }}
-      >
+      {/* Letter tiles: done = green, current = blue + bigger, upcoming = white */}
+      <View style={{ flexDirection: 'row', gap: 8, marginTop: 14, marginBottom: 12 }}>
         {letters.map((l, k) => {
           const isDone = k < i;
           const isCurrent = k === i;
+          const tone: Tone = isDone ? 'green' : isCurrent ? 'blue' : 'white';
 
           return (
-            <View
+            <Card
               key={k}
-              style={{
-                flex: 1,
-                height: scale(60),
-                borderRadius: radius.md,
-                backgroundColor: isDone
-                  ? '#DCFCE7'
-                  : isCurrent
-                  ? '#EFF6FF'
-                  : colors.white,
-                borderWidth: isCurrent ? 3 : 2,
-                borderBottomWidth: isCurrent ? 4.5 : 3.5,
-                borderColor: isDone
-                  ? '#86EFAC'
-                  : isCurrent
-                  ? '#3B82F6'
-                  : '#E2E8F0',
-                borderBottomColor: isDone
-                  ? '#4ADE80'
-                  : isCurrent
-                  ? '#1D4ED8'
-                  : '#CBD5E1',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transform: [{ translateY: isCurrent ? -2 : 0 }],
-                ...shadows.card,
-              }}
+              tone={tone}
+              r={radius.md}
+              style={{ flex: 1, height: scale(isCurrent ? 68 : 60), alignSelf: 'flex-end' }}
             >
               <Text
                 style={{
                   ...typography.title,
-                  fontSize: 26,
-                  fontWeight: '900',
-                  color: isDone
-                    ? '#15803D'
-                    : isCurrent
-                    ? '#1D4ED8'
-                    : '#64748B',
+                  fontSize: isCurrent ? 32 : 28,
+                  color: isDone ? colors.greenDark : tones[tone].label,
                 }}
               >
                 {l}
               </Text>
               {isDone && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 2,
-                    right: 3,
-                  }}
-                >
-                  <Ionicons name="checkmark-circle" size={14} color="#16A34A" />
+                <View style={{ position: 'absolute', top: 3, right: 3 }}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.green} />
                 </View>
               )}
-            </View>
+            </Card>
           );
         })}
       </View>
 
-      {/* Screen 5: Action Buttons */}
-      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 8 }}>
-        <Btn
-          label="Clear"
-          icon="refresh"
-          kind="red"
-          onPress={() => cv.current?.clear()}
-          style={{ flex: 1 }}
-          small
-        />
-        <Btn
-          label="Hear Again"
-          icon="volume-high"
-          kind="blue"
-          onPress={() => speak(a.name, true)}
-          style={{ flex: 1.2 }}
-          small
-        />
+      {/* Clear & Hear Again */}
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 6 }}>
+        <Btn label="Clear" icon="refresh" kind="red" onPress={() => cv.current?.clear()} style={{ flex: 1 }} small />
+        <Btn label="Hear Again" icon="volume-high" kind="blue" onPress={() => speak(a.name, true)} style={{ flex: 1 }} small />
       </View>
     </Scene>
   );

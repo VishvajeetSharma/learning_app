@@ -3,11 +3,11 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, Switch, Text, View } from 'react-native';
 import { useStore } from '@/lib/store';
-import { colors } from '@/theme/colors';
+import { ButtonKind, buttons, colors, ui } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { shadows } from '@/theme/shadows';
 import { typography } from '@/theme/typography';
-import { Btn, Header, Scene } from '@/ui/kit';
+import { Btn, Gradient, Header, Scene } from '@/ui/kit';
 
 type Icon = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -19,48 +19,50 @@ export default function Settings() {
     icon: Icon,
     label: string,
     right: React.ReactNode,
-    iconBg: string,
-    iconColor: string,
     onPress?: () => void,
-    textColor: string = '#1E293B',
-    isLast: boolean = false
+    kind: ButtonKind = 'blue',
+    danger = false,
+    last = false
   ) => (
     <Pressable
       onPress={onPress}
       disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : undefined}
       style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 13,
+        minHeight: 72,
+        paddingVertical: 10,
         paddingHorizontal: 16,
-        borderBottomWidth: isLast ? 0 : 1,
-        borderColor: '#F1F5F9',
-        backgroundColor: pressed ? '#F8FAFC' : colors.white,
+        borderBottomWidth: last ? 0 : 1.5,
+        borderColor: '#E6EEF8',
+        backgroundColor: pressed ? '#F1F7FF' : 'transparent',
       })}
     >
       <View
         style={{
-          width: 38,
-          height: 38,
-          borderRadius: 19,
-          backgroundColor: iconBg,
+          width: 46,
+          height: 46,
+          borderRadius: 15,
+          overflow: 'hidden',
           alignItems: 'center',
           justifyContent: 'center',
-          borderWidth: 1.5,
+          borderWidth: 2.5,
           borderColor: colors.white,
-          ...shadows.subtle,
+          backgroundColor: buttons[kind].face,
+          ...shadows.card,
         }}
       >
-        <Ionicons name={icon} size={20} color={iconColor} />
+        <Gradient stops={[buttons[kind].top, buttons[kind].face]} />
+        <Ionicons name={icon} size={24} color={colors.white} />
       </View>
       <Text
         style={{
-          ...typography.body,
-          fontWeight: '800',
-          color: textColor,
+          ...typography.bodyStrong,
+          fontSize: 18,
+          color: danger ? colors.redDark : colors.ink,
           flex: 1,
           marginLeft: 14,
-          fontSize: 15.5,
         }}
       >
         {label}
@@ -73,140 +75,108 @@ export default function Settings() {
     <Switch
       value={st[k]}
       onValueChange={(v) => st.set(k, v)}
-      trackColor={{ true: '#10B981', false: '#E2E8F0' }}
+      trackColor={{ true: colors.green, false: '#D3DEEB' }}
       thumbColor={colors.white}
+      style={{ transform: [{ scale: 1.1 }] }}
     />
   );
 
-  const chev = <Ionicons name="chevron-forward" size={18} color="#94A3B8" />;
+  const chev = <Ionicons name="chevron-forward" size={22} color="#94A3B8" />;
 
   return (
     <Scene bg="animals">
-      {/* Screen 12: Header */}
       <Header title="Settings" home={false} back={true} />
 
-      {/* Screen 12: Settings List Grouped Card */}
+      {/* Grouped settings card */}
       <View
         style={{
-          backgroundColor: colors.white,
-          borderRadius: radius.card,
+          backgroundColor: ui.panel,
+          borderRadius: radius.xl,
           overflow: 'hidden',
-          borderWidth: 2,
-          borderBottomWidth: 4,
-          borderColor: '#E2E8F0',
-          borderBottomColor: '#CBD5E1',
-          ...shadows.card,
+          borderWidth: 3,
+          borderColor: colors.white,
+          ...shadows.soft,
         }}
       >
-        {row('volume-high', 'Sound Effects', sw('sound'), '#FFEDD5', '#EA580C')}
-        {row('megaphone', 'Voice Pronunciation', sw('voice'), '#DCFCE7', '#16A34A')}
-        {row('musical-notes', 'Background Music', sw('music'), '#F3E8FF', '#9333EA')}
-        {row(
-          'trophy',
-          'View Progress',
-          chev,
-          '#FEF9C3',
-          '#CA8A04',
-          () => router.push('/progress')
-        )}
-        {row(
-          'refresh-circle',
-          'Reset Progress',
-          chev,
-          '#FFE4E6',
-          '#E11D48',
-          () => setAsk(true),
-          '#E11D48'
-        )}
+        {row('volume-high', 'Sound Effects', sw('sound'), undefined, 'blue')}
+        {row('megaphone', 'Voice Pronunciation', sw('voice'), undefined, 'green')}
+        {row('musical-notes', 'Background Music', sw('music'), undefined, 'purple')}
+        {row('trophy', 'View Progress', chev, () => router.push('/progress'), 'yellow')}
+        {row('refresh-circle', 'Reset Progress', chev, () => setAsk(true), 'red', true)}
         {row(
           'information-circle',
           'About App',
           chev,
-          '#E0F2FE',
-          '#0284C7',
           () =>
             Alert.alert(
               'Little Learners',
-              'Play • Learn • Grow\nVersion 1.0.0\nSafe, fun & ad-free.'
+              'Play • Learn • Grow\nVersion 1.0.0\nSafe & ad-free.'
             ),
-          '#1E293B',
+          'orange',
+          false,
           true
         )}
       </View>
 
       <View style={{ flex: 1 }} />
 
-      {/* Screen 12: Bottom Reset Confirmation Modal */}
+      {/* Reset confirmation (visual dim behind it never blocks touches) */}
+      {ask && (
+        <View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: -300, bottom: -300, left: -40, right: -40, backgroundColor: colors.overlay }}
+        />
+      )}
       {ask && (
         <View
           style={{
-            backgroundColor: '#FFF1F2',
-            borderRadius: radius.card,
-            borderWidth: 2.5,
-            borderBottomWidth: 4.5,
-            borderColor: '#FECDD3',
-            borderBottomColor: '#FDA4AF',
+            backgroundColor: ui.dangerBg,
+            borderRadius: radius.xl,
+            borderWidth: 3,
+            borderColor: ui.dangerEdge,
             padding: 20,
             alignItems: 'center',
             marginBottom: 16,
-            ...shadows.card,
+            ...shadows.lift,
           }}
         >
-          {/* Red exclamation mark in circle */}
           <View
             style={{
-              width: 50,
-              height: 50,
-              borderRadius: 25,
-              backgroundColor: '#F43F5E',
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              overflow: 'hidden',
+              backgroundColor: colors.red,
+              borderWidth: 3,
+              borderColor: colors.white,
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 10,
-              borderWidth: 2.5,
-              borderColor: colors.white,
-              shadowColor: '#F43F5E',
-              shadowOpacity: 0.35,
-              shadowRadius: 6,
-              shadowOffset: { width: 0, height: 3 },
-              elevation: 4,
+              marginBottom: 8,
+              ...shadows.button,
             }}
           >
-            <Ionicons name="alert" size={28} color={colors.white} />
+            <Gradient stops={[buttons.red.top, colors.red]} />
+            <Ionicons name="warning" size={30} color={colors.white} />
           </View>
 
-          <Text
-            style={{
-              ...typography.title,
-              color: '#BE123C',
-              fontSize: 20,
-              fontWeight: '900',
-              marginBottom: 4,
-            }}
-          >
+          <Text style={{ ...typography.title, color: colors.redDark, fontSize: 24, marginBottom: 4 }}>
             Reset Progress?
           </Text>
           <Text
             style={{
               ...typography.body,
               textAlign: 'center',
-              color: '#475569',
-              fontSize: 13,
+              color: colors.ink,
+              fontSize: 15,
               marginBottom: 16,
               paddingHorizontal: 8,
-              lineHeight: 18,
             }}
           >
             This will clear all your learning progress.{'\n'}This action cannot be undone.
           </Text>
 
           <View style={{ flexDirection: 'row', gap: 12, width: '100%' }}>
-            <Btn
-              label="Cancel"
-              kind="white"
-              onPress={() => setAsk(false)}
-              style={{ flex: 1 }}
-              small
-            />
+            <Btn label="Cancel" kind="soft" onPress={() => setAsk(false)} style={{ flex: 1 }} small />
             <Btn
               label="Yes, Reset"
               kind="red"

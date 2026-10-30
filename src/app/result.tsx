@@ -1,17 +1,17 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Text, View, useWindowDimensions } from 'react-native';
 import { ANIMALS, getAnimal } from '@/data/animals';
 import { attempt } from '@/lib/attempt';
 import { speak } from '@/lib/speak';
 import { useStore } from '@/lib/store';
-import { colors } from '@/theme/colors';
+import { colors, ui } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 import { shadows } from '@/theme/shadows';
 import { scale } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { StrokePreview } from '@/ui/Canvas';
-import { AnimalImg, Btn, Scene } from '@/ui/kit';
+import { AnimalImg, Btn, Card, Confetti, Rays, Ribbon, Scene } from '@/ui/kit';
 
 export default function Result() {
   const { id, ok } = useLocalSearchParams<{ id: string; ok: string }>();
@@ -21,151 +21,131 @@ export default function Result() {
   const last = idx === ANIMALS.length - 1;
   const { voice } = useStore();
   const [showInk, setShowInk] = useState(true);
+  const { height } = useWindowDimensions();
+  const animalSize = Math.max(150, Math.min(good ? 240 : 200, height * (good ? 0.27 : 0.22)));
+
+  // gentle "uh-oh" shake for the wrong-answer screen (decorative)
+  const [shake] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    if (good) return;
+    Animated.sequence([
+      Animated.delay(250),
+      Animated.timing(shake, { toValue: 1, duration: 70, useNativeDriver: true }),
+      Animated.timing(shake, { toValue: -1, duration: 110, useNativeDriver: true }),
+      Animated.timing(shake, { toValue: 1, duration: 110, useNativeDriver: true }),
+      Animated.timing(shake, { toValue: 0, duration: 70, useNativeDriver: true }),
+    ]).start();
+  }, [good, shake]);
 
   const retry = () => router.replace({ pathname: '/write', params: { id: a.id } });
+  const rainbow = [colors.coral, colors.orange, colors.green, colors.blue, colors.purple];
 
   return (
-    <Scene bg={good ? 'success' : 'wrong'}>
-      <View style={{ alignItems: 'center', marginTop: scale(12) }}>
-        {/* Screen 7 & 8: 3D Inflated Title */}
-        <View
-          style={{
-            backgroundColor: good ? '#FEF3C7' : '#FFE4E6',
-            paddingHorizontal: 22,
-            paddingVertical: 6,
-            borderRadius: radius.pill,
-            borderWidth: 2.5,
-            borderColor: good ? '#FCD34D' : '#FDA4AF',
-            shadowColor: good ? '#D97706' : '#E11D48',
-            shadowOpacity: 0.18,
-            shadowRadius: 6,
-            shadowOffset: { width: 0, height: 3 },
-            elevation: 4,
-          }}
-        >
-          <Text
-            style={{
-              ...typography.hero,
-              fontSize: scale(32),
-              color: good ? '#D97706' : '#E11D48',
-              fontWeight: '900',
-              letterSpacing: 1,
-            }}
-          >
-            {good ? 'Excellent! 🌟' : 'Almost There! 💪'}
-          </Text>
-        </View>
+    <Scene bg={good ? 'success' : 'wrong'} overlay={good ? <Confetti count={24} /> : null}>
+      <View style={{ alignItems: 'center', marginTop: scale(10) }}>
+        <Ribbon text={good ? 'Excellent!' : 'Not quite!'} kind={good ? 'orange' : 'red'} stars={good} />
 
         {!good && (
-          <Text
+          <View
             style={{
-              ...typography.title,
-              textAlign: 'center',
-              color: '#1E293B',
-              fontSize: 16,
-              fontWeight: '800',
-              marginTop: 6,
+              marginTop: 10,
+              paddingHorizontal: 18,
+              paddingVertical: 8,
+              borderRadius: radius.xl,
+              backgroundColor: ui.panel,
+              borderWidth: 2.5,
+              borderColor: colors.white,
+              ...shadows.card,
             }}
           >
-            That&apos;s not quite right.{'\n'}Let&apos;s practice again!
-          </Text>
+            <Text style={{ ...typography.bodyStrong, textAlign: 'center', color: colors.ink, fontSize: 18 }}>
+              That&apos;s not correct.{'\n'}Try again!
+            </Text>
+          </View>
         )}
 
-        {/* Animal Character */}
-        <View style={{ marginTop: scale(8) }}>
-          <AnimalImg
-            animal={a}
-            size={scale(good ? 220 : 180)}
-            dim={!good}
-            aura={good}
-          />
+        {/* Animal character (sunburst + halo when correct) */}
+        <View
+          style={{
+            marginTop: scale(good ? 8 : 12),
+            width: animalSize,
+            height: animalSize,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {good && (
+            <View style={{ position: 'absolute' }}>
+              <Rays size={animalSize * 1.9} />
+            </View>
+          )}
+          <Animated.View
+            style={{
+              transform: [{ translateX: shake.interpolate({ inputRange: [-1, 1], outputRange: [-10, 10] }) }],
+            }}
+          >
+            <AnimalImg animal={a} size={animalSize} dim={!good} aura={good} bounce={good} />
+          </Animated.View>
         </View>
 
         {good && (
           <View
             style={{
+              marginTop: scale(10),
               alignItems: 'center',
-              marginTop: scale(6),
-              backgroundColor: 'rgba(255, 255, 255, 0.92)',
-              paddingHorizontal: 24,
-              paddingVertical: 10,
+              paddingHorizontal: 26,
+              paddingVertical: 8,
               borderRadius: radius.xl,
-              borderWidth: 2,
-              borderColor: '#BBF7D0',
-              ...shadows.card,
+              backgroundColor: ui.panel,
+              borderWidth: 3,
+              borderColor: colors.white,
+              ...shadows.lift,
             }}
           >
-            <Text style={{ ...typography.subheading, fontSize: 15, color: '#64748B', fontWeight: '800' }}>
-              You wrote
+            <Text style={{ ...typography.heading, fontSize: 18, color: colors.title }}>You wrote</Text>
+            <Text style={{ ...typography.hero, fontSize: scale(40), letterSpacing: 3 }}>
+              {a.name
+                .toUpperCase()
+                .split('')
+                .map((c, i) => (
+                  <Text key={i} style={{ color: rainbow[i % rainbow.length] }}>
+                    {c}
+                  </Text>
+                ))}
             </Text>
-            <Text
-              style={{
-                ...typography.hero,
-                fontSize: scale(36),
-                color: '#15803D',
-                fontWeight: '900',
-                letterSpacing: 2,
-                marginVertical: 2,
-              }}
-            >
-              {a.name.toUpperCase()}
-            </Text>
-            <Text style={{ ...typography.subheading, fontSize: 15, color: '#64748B', fontWeight: '800' }}>
-              correctly! 🎉
-            </Text>
+            <Text style={{ ...typography.heading, fontSize: 18, color: colors.title }}>correctly!</Text>
           </View>
         )}
       </View>
 
-      {/* Screen 8: Display Child's Handwriting attempt */}
+      {/* Child's handwriting attempt */}
       {!good && (
-        <View style={{ alignItems: 'center', marginTop: 10 }}>
-          <View
-            style={{
-              backgroundColor: colors.white,
-              borderRadius: radius.xl,
-              width: '92%',
-              height: scale(96),
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderWidth: 2.5,
-              borderColor: '#FECDD3',
-              borderBottomWidth: 4,
-              borderBottomColor: '#FDA4AF',
-              ...shadows.card,
-            }}
-          >
+        <View style={{ alignItems: 'center', marginTop: 12 }}>
+          <Card tone="white" r={radius.lg} style={{ width: '94%', height: scale(108) }}>
             {showInk && attempt.strokes.length ? (
               <StrokePreview
                 strokes={attempt.strokes}
                 srcW={attempt.w}
                 srcH={attempt.h}
                 width={scale(280)}
-                height={scale(80)}
-                ink="#F43F5E"
+                height={scale(86)}
+                ink={colors.red}
               />
             ) : null}
-          </View>
+          </Card>
           {attempt.hint ? (
             <View
               style={{
-                backgroundColor: '#FFF1F2',
-                paddingHorizontal: 16,
-                paddingVertical: 5,
-                borderRadius: radius.pill,
                 marginTop: 8,
-                borderWidth: 1,
-                borderColor: '#FECDD3',
+                paddingHorizontal: 14,
+                paddingVertical: 6,
+                borderRadius: radius.lg,
+                backgroundColor: ui.dangerBg,
+                borderWidth: 2,
+                borderColor: ui.dangerEdge,
               }}
             >
-              <Text
-                style={{
-                  ...typography.small,
-                  color: '#BE123C',
-                  fontWeight: '800',
-                  textAlign: 'center',
-                }}
-              >
+              <Text style={{ ...typography.bodyStrong, color: colors.redDark, textAlign: 'center', fontSize: 15 }}>
                 {attempt.hint}
               </Text>
             </View>
@@ -175,17 +155,10 @@ export default function Result() {
 
       <View style={{ flex: 1 }} />
 
-      {/* Screen 7 & 8: Buttons */}
-      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 10 }}>
+      {/* Buttons */}
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
         {!good && (
-          <Btn
-            label="Clear"
-            icon="refresh"
-            kind="red"
-            onPress={() => setShowInk(false)}
-            style={{ flex: 1 }}
-            small
-          />
+          <Btn label="Clear" icon="refresh" kind="red" onPress={() => setShowInk(false)} style={{ flex: 1 }} small />
         )}
         <Btn
           label="Hear Again"
@@ -199,7 +172,8 @@ export default function Result() {
 
       {good ? (
         <Btn
-          label={last ? 'See My Progress →' : 'Next Animal →'}
+          label={last ? 'See My Progress' : 'Next Animal'}
+          iconRight="arrow-forward"
           kind="green"
           onPress={() =>
             last

@@ -33,6 +33,6 @@ export const DECOR: {
   confetti?: ImageSourcePropType;
   categories?: Partial<Record<string, ImageSourcePropType>>;
 } = {
-  logo: require('../../assets/branding/little_learners_logo.png'),
-  woodBoard: require('../../assets/decorations/wooden_board.png'),
+  logo: require('../../assets/branding/little_learners_logo_cutout.png'),
+  woodBoard: require('../../assets/decorations/wood_sign_wide.png'),
 };

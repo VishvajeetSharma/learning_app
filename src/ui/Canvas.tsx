@@ -39,10 +39,14 @@ const Guide = memo(function Guide({ letter, w, h }: { letter: string; w: number;
         const tri = [[e.x + Math.cos(ang) * L, e.y + Math.sin(ang) * L], [e.x + Math.cos(ang + 2.5) * L, e.y + Math.sin(ang + 2.5) * L], [e.x + Math.cos(ang - 2.5) * L, e.y + Math.sin(ang - 2.5) * L]].map((p) => p.join(',')).join(' ');
         return (
           <G key={i}>
+            {/* soft ghost path so little eyes can see the route, then the dotted guide on top */}
+            <Path d={'M' + pts.map((p) => `${p.x} ${p.y}`).join(' L')} stroke={colors.blueGlow} strokeOpacity={0.28} strokeWidth={26} strokeLinecap="round" strokeLinejoin="round" fill="none" />
             <Path d={'M' + pts.map((p) => `${p.x} ${p.y}`).join(' L')} stroke={colors.dotGuide} strokeWidth={7} strokeDasharray="0.1 14" strokeLinecap="round" fill="none" />
-            <Polygon points={tri} fill={colors.blue} />
-            <Circle cx={a.x} cy={a.y} r={13} fill={i === 0 ? colors.red : colors.blue} />
-            <SvgText x={a.x} y={a.y + 5} fontSize={15} fontWeight="bold" fill={colors.white} textAnchor="middle">{i + 1}</SvgText>
+            <Polygon points={tri} fill={colors.blue} stroke={colors.white} strokeWidth={2} strokeLinejoin="round" />
+            <Circle cx={a.x} cy={a.y + 2} r={17} fill={colors.ink} opacity={0.18} />
+            <Circle cx={a.x} cy={a.y} r={17} fill={colors.white} />
+            <Circle cx={a.x} cy={a.y} r={14} fill={i === 0 ? colors.red : colors.blue} />
+            <SvgText x={a.x} y={a.y + 6} fontSize={17} fontWeight="bold" fill={colors.white} textAnchor="middle">{i + 1}</SvgText>
           </G>
         );
       })}
